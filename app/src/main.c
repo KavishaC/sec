@@ -173,7 +173,7 @@ int main() {
     }
     
     uint32_t sample_rate = 44100;  // Sample rate (e.g., 44100 Hz)
-    uint32_t num_samples = 1;      // For simplicity, writing 1 sample
+    uint32_t num_samples = TRANSFER_RUNS * TRANSFER_LEN;      // For simplicity, writing 1 sample
     
     // Write WAV header
     write_wav_header(file, sample_rate, num_samples);
