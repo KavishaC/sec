@@ -29,7 +29,7 @@
 // #include "wav.h"
 
 
-#define TRANSFER_RUNS 100
+#define TRANSFER_RUNS 1000
 
 #define NUM_CHANNELS 2
 #define BPS 24
