@@ -49,9 +49,9 @@ void write_18bit_sample(FILE *file, int32_t sample_18bit) {
     uint8_t buffer[3];
     
     // Write 18-bit sample packed into 24 bits
-    buffer[0] = (sample_18bit >> 10) & 0xFF;  // Most significant byte
-    buffer[1] = (sample_18bit >> 2) & 0xFF;   // Middle byte
-    buffer[2] = (sample_18bit << 6) & 0xFF;          // Least significant byte (LSB)
+    buffer[0] = (sample_18bit >> 16) & 0xFF;  // Most significant byte
+    buffer[1] = (sample_18bit >> 8) & 0xFF;   // Middle byte
+    buffer[2] = sample_18bit & 0xFF;          // Least significant byte (LSB)
 
     // Write the 3-byte (24-bit) sample to the file
     fwrite(buffer, sizeof(buffer), 1, file);
@@ -79,7 +79,7 @@ void parsemem(void* virtual_address, int word_count, FILE *file) {
 
         // Write the 18-bit sample as 24-bit audio
         if ((offset % 2) == 1) {
-            write_18bit_sample(file, sample_value/2 + sample_value_prev/2); // if odd write
+            write_18bit_sample(file, sample_value + sample_value_prev); // if odd write
         }
         // write_18bit_sample(file, sample_value);
         sample_value_prev = sample_value;
