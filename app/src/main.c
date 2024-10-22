@@ -49,9 +49,9 @@ void write_18bit_sample(FILE *file, int32_t sample_18bit) {
     uint8_t buffer[3];
     
     // Write 18-bit sample packed into 24 bits
-    buffer[0] = (sample_18bit >> 16) & 0xFF;  // Most significant byte
-    buffer[1] = (sample_18bit >> 8) & 0xFF;   // Middle byte
-    buffer[2] = sample_18bit & 0xFF;          // Least significant byte (LSB)
+    buffer[0] = (sample_18bit >> 17) & 0xFF;  // Most significant byte
+    buffer[1] = (sample_18bit >> 9) & 0xFF;   // Middle byte
+    buffer[2] = (sample_18bit >> 1) & 0xFF;          // Least significant byte (LSB)
 
     // Write the 3-byte (24-bit) sample to the file
     fwrite(buffer, sizeof(buffer), 1, file);
@@ -130,7 +130,7 @@ void write_wav_header(FILE *file, uint32_t sample_rate, uint32_t num_samples) {
     header.fmt[1] = 'm';
     header.fmt[2] = 't';
     header.fmt[3] = ' ';
-    header.subchunk1_size = 24;  // PCM size
+    header.subchunk1_size = 16;  // PCM size
     header.audio_format = 1;     // PCM
     header.num_channels = 1;     // Mono
     header.sample_rate = sample_rate;
