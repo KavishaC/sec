@@ -72,10 +72,10 @@ void parsemem(void* virtual_address, int word_count, FILE *file) {
 
         for (int i = 0; i < 4; i++) {
             bin(b[offset*4+i]);
-            printf(" ");
+            //printf(" ");
         }
 
-        printf(" -> [%d]: %02x (%dp)\n", sample_count, sample_value, sample_value*100/((1<<18)-1));
+        //printf(" -> [%d]: %02x (%dp)\n", sample_count, sample_value, sample_value*100/((1<<18)-1));
 
         // Write the 18-bit sample as 24-bit audio
         if ((offset % 2) == 1) {
@@ -197,7 +197,7 @@ int main() {
     for (int i = 0; i < TRANSFER_RUNS; i++) {
         printf("Frame %d:\n", i);
         parsemem(frames[i], TRANSFER_LEN, file);
-        printf("==============================\n");
+        //printf("==============================\n");
     }
     
     audio_i2s_release(&my_config);
