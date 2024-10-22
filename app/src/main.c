@@ -57,7 +57,7 @@ void write_18bit_sample(FILE *file, int32_t sample_18bit) {
     fwrite(buffer, sizeof(buffer), 1, file);
 }
 
-void parsemem(void* virtual_address, int word_count, FILE *file) {
+void parsemem(void* virtual_address, int word_count, FILE *file, int i) {
     uint32_t *p = (uint32_t *)virtual_address;
     char *b = (char*)virtual_address;
     int offset;
@@ -76,8 +76,8 @@ void parsemem(void* virtual_address, int word_count, FILE *file) {
         printf(" -> [%d]: %02x (%dp)\n", sample_count, sample_value, sample_value*100/((1<<18)-1));
 
         // Write the 18-bit sample as 24-bit audio
-        // if (i % 2 == 0) write_18bit_sample(file, sample_value); // if even write
-        write_18bit_sample(file, sample_value);
+        if (i % 2 == 0) write_18bit_sample(file, sample_value); // if even write
+        // write_18bit_sample(file, sample_value);
     }
 
 }
@@ -181,12 +181,6 @@ int main() {
     // Example 18-bit number (you can modify this as needed)
     int32_t sample_18bit = 0x3FFFF;  // A 18-bit number (262143 in decimal)
 
-    
-    // audio_i2s_release(&my_config);
-
-    // return 0;
-
-
     printf("Initialized audio_i2s\n");
     printf("Starting audio_i2s_recv\n");
 
@@ -197,7 +191,7 @@ int main() {
 
     for (int i = 0; i < TRANSFER_RUNS; i++) {
         printf("Frame %d:\n", i);
-        parsemem(frames[i], TRANSFER_LEN, file);
+        parsemem(frames[i], TRANSFER_LEN, file, i);
         printf("==============================\n");
     }
     
