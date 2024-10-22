@@ -130,7 +130,7 @@ void write_wav_header(FILE *file, uint32_t sample_rate, uint32_t num_samples) {
     header.fmt[1] = 'm';
     header.fmt[2] = 't';
     header.fmt[3] = ' ';
-    header.subchunk1_size = 16;  // PCM size
+    header.subchunk1_size = 24;  // PCM size
     header.audio_format = 1;     // PCM
     header.num_channels = 1;     // Mono
     header.sample_rate = sample_rate;
