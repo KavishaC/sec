@@ -71,7 +71,7 @@ void parsemem(void* virtual_address, int word_count, FILE *file) {
         sample_count = p[offset] >> 18;
 
         for (int i = 0; i < 4; i++) {
-            bin(b[offset*4+i]);
+            //bin(b[offset*4+i]);
             //printf(" ");
         }
 
