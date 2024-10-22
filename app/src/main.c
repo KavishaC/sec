@@ -76,7 +76,7 @@ void parsemem(void* virtual_address, int word_count, FILE *file) {
         printf(" -> [%d]: %02x (%dp)\n", sample_count, sample_value, sample_value*100/((1<<18)-1));
 
         // Write the 18-bit sample as 24-bit audio
-        if (offset % 2 == 0) write_18bit_sample(file, sample_value); // if even write
+        if ((offset % 2) == 1) write_18bit_sample(file, sample_value); // if even write
         // write_18bit_sample(file, sample_value);
     }
 
