@@ -51,7 +51,7 @@ void write_18bit_sample(FILE *file, int32_t sample_18bit) {
     // Write 18-bit sample packed into 24 bits
     buffer[0] = (sample_18bit >> 17) & 0xFF;  // Most significant byte
     buffer[1] = (sample_18bit >> 9) & 0xFF;   // Middle byte
-    buffer[2] = (sample_18bit >> 1) & 0xFF;          // Least significant byte (LSB)
+    buffer[2] = (sample_18bit >> 1) & 0xFF;   // Least significant byte (LSB)
 
     // Write the 3-byte (24-bit) sample to the file
     fwrite(buffer, sizeof(buffer), 1, file);
