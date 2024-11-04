@@ -52,7 +52,7 @@ void write_18bit_sample(FILE *file, int32_t sample_18bit) {
     /*
     Assume already signed. therefore dont convert and write in little endian
     */
-    int32_t sample_signed = sample_18bit;
+    int32_t sample_signed = sample_18bit << 6; // now in 24 bit format
 
     /*
     Assume not signed. therefore convert and write in little endian
