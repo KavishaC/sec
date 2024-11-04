@@ -49,16 +49,16 @@ void bin(uint8_t n) {
 void write_18bit_sample(FILE *file, uint32_t sample_18bit) {
     uint8_t buffer[4];
     
-    sample_18bit = sample_18bit << 6; // now in 24 bit format
-    sample_18bit = sample_18bit << 8; // now in 32 bit format
+    //sample_18bit = sample_18bit << 6; // now in 24 bit format
+    //sample_18bit = sample_18bit << 8; // now in 32 bit format
 
     //sample_18bit ^= 0X80000000;
 
     // Write 18-bit sample packed into 24 bits
-    buffer[3] = (sample_18bit >> 24) & 0xFF;  // Most significant byte
-    buffer[2] = (sample_18bit >> 16) & 0xFF;   // Middle byte
-    buffer[1] = (sample_18bit >> 8) & 0xFF;   // Middle byte
     buffer[0] = (sample_18bit >> 0) & 0xFF;   // Least significant byte (LSB)
+    buffer[1] = (sample_18bit >> 8) & 0xFF;   // Middle byte
+    buffer[2] = (sample_18bit >> 16) & 0xFF;   // Middle byte
+    buffer[3] = (sample_18bit >> 24) & 0xFF;  // Most significant byte
 
     // Write the 3-byte (24-bit) sample to the file
     fwrite(buffer, sizeof(buffer), 1, file);
@@ -74,7 +74,7 @@ void parsemem(void* virtual_address, int word_count, FILE *file) {
     uint32_t sample_value_prev = 0;
 
     for (offset = 0; offset < word_count; offset++) {
-        sample_value = p[offset] & ((1<<18)-1);
+        sample_value = p[offset];
         // sample_count = p[offset] >> 18;
 
         for (int i = 0; i < 4; i++) {
