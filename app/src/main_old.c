@@ -76,7 +76,7 @@ void parsemem(void* virtual_address, int word_count, FILE *file) {
         sample_value = p[offset] & ((1<<18)-1);
         sample_count = p[offset] >> 18;
 
-        for (int i = 0; i < 4; i++) {
+        for (int i = 0; i < 4; i++) { // the bits are printed in reverse
             //bin(b[offset*4+i]);
             //printf(" ");
         }
