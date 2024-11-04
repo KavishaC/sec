@@ -49,7 +49,7 @@ void bin(uint8_t n) {
 void write_18bit_sample(FILE *file, int32_t sample_18bit) {
     uint8_t buffer[3];
     
-    int32_t sample_18bit = sample_18bit << 6; // now in 24 bit format
+    sample_18bit = sample_18bit << 6; // now in 24 bit format
 
     // Write 18-bit sample packed into 24 bits
     buffer[0] = (sample_18bit >> 16) & 0xFF;  // Most significant byte
