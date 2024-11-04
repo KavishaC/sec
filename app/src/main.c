@@ -46,10 +46,15 @@ void bin(uint8_t n) {
 }
 
 // Function to write 18-bit number into 24-bit audio sample
-void write_18bit_sample(FILE *file, int32_t sample_18bit) {
+void write_18bit_sample(FILE *file, uint32_t sample_18bit) {
     uint8_t buffer[3];
     
     sample_18bit = sample_18bit << 6; // now in 24 bit format
+    sample_18bit = sample_18bit << 8; // now in 32 bit format
+
+    sample_18bit ^= 0x80000000;
+
+    sample_18bit = sample_18bit >> 8; // back in 24 bit format
 
     // Write 18-bit sample packed into 24 bits
     buffer[0] = (sample_18bit >> 16) & 0xFF;  // Most significant byte
@@ -81,7 +86,7 @@ void parsemem(void* virtual_address, int word_count, FILE *file) {
         //printf(" -> [%d]: %02x (%dp)\n", sample_count, sample_value, sample_value*100/((1<<18)-1));
 
         // Write the 18-bit sample as 24-bit audio
-        if ((offset % 2) == 1) {
+        if ((offset % 2) == 1 && (sample_value + sample_value_prev != 0)) {
             write_18bit_sample(file, sample_value + sample_value_prev); // if odd write
         }
         // write_18bit_sample(file, sample_value);
