@@ -97,6 +97,38 @@ void parsemem(void* virtual_address, int word_count, FILE *file) {
     }
 }
 
+// Function to write WAV file header
+void write_wav_header(FILE *file, int num_samples) {
+    int subchunk2_size = num_samples * 3; // 3 bytes per 24-bit sample
+    int chunk_size = 36 + subchunk2_size;
+
+    // RIFF header
+    fwrite("RIFF", 1, 4, file);
+    fwrite(&chunk_size, 4, 1, file);
+    fwrite("WAVE", 1, 4, file);
+
+    // fmt subchunk
+    fwrite("fmt ", 1, 4, file);
+    int subchunk1_size = 16;       // PCM format
+    short audio_format = 1;        // PCM
+    short num_channels = 1;        // Mono
+    int sample_rate = SAMPLE_RATE;
+    int byte_rate = SAMPLE_RATE * 3; // 3 bytes per sample for 24-bit PCM
+    short block_align = 3;         // 3 bytes per sample
+    short bits_per_sample = 24;    // 24 bits per sample
+
+    fwrite(&subchunk1_size, 4, 1, file);
+    fwrite(&audio_format, 2, 1, file);
+    fwrite(&num_channels, 2, 1, file);
+    fwrite(&sample_rate, 4, 1, file);
+    fwrite(&byte_rate, 4, 1, file);
+    fwrite(&block_align, 2, 1, file);
+    fwrite(&bits_per_sample, 2, 1, file);
+
+    // data subchunk
+    fwrite("data", 1, 4, file);
+    fwrite(&subchunk2_size, 4, 1, file);
+}
 
 int main() {
     printf("Entered main\n");
