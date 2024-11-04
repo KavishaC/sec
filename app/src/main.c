@@ -52,7 +52,7 @@ void write_18bit_sample(FILE *file, uint32_t sample_18bit) {
     sample_18bit = sample_18bit << 6; // now in 24 bit format
     sample_18bit = sample_18bit << 8; // now in 32 bit format
 
-    sample_18bit ^= 0X80000000;
+    //sample_18bit ^= 0X80000000;
 
     // Write 18-bit sample packed into 24 bits
     buffer[0] = (sample_18bit >> 24) & 0xFF;  // Most significant byte
