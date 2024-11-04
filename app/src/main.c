@@ -53,7 +53,7 @@ void write_18bit_sample(FILE *file, uint32_t sample_18bit) {
     sample_18bit = sample_18bit << 8; // now in 32 bit format
 
     // sample_18bit ^= 0X80000000;
-
+    sample_18bit -= 0xF8000000;
     // Write 18-bit sample packed into 24 bits
     buffer[0] = (sample_18bit >> 0) & 0xFF;   // Least significant byte (LSB)
     buffer[1] = (sample_18bit >> 8) & 0xFF;   // Middle byte
