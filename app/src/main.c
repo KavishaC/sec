@@ -96,7 +96,7 @@ void parsemem(void* virtual_address, int word_count, FILE *file) {
 
 // Function to write WAV file header
 void write_wav_header(FILE *file, int num_samples) {
-    int subchunk2_size = num_samples * 3; // 3 bytes per 24-bit sample
+    int subchunk2_size = num_samples * 4; // 3 bytes per 24-bit sample
     int chunk_size = 36 + subchunk2_size;
 
     // RIFF header
