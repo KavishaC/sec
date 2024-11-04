@@ -47,7 +47,7 @@ void bin(uint8_t n) {
 
 // Function to write 18-bit number into 24-bit audio sample
 void write_18bit_sample(FILE *file, uint32_t sample_18bit) {
-    uint8_t buffer[3];
+    uint8_t buffer[4];
     
     sample_18bit = sample_18bit << 6; // now in 24 bit format
     sample_18bit = sample_18bit << 8; // now in 32 bit format
@@ -55,9 +55,10 @@ void write_18bit_sample(FILE *file, uint32_t sample_18bit) {
     sample_18bit ^= 0X80000000;
 
     // Write 18-bit sample packed into 24 bits
-    buffer[0] = (sample_18bit >> 8) & 0xFF;   // Least significant byte (LSB)
+    buffer[0] = (sample_18bit >> 24) & 0xFF;  // Most significant byte
     buffer[1] = (sample_18bit >> 16) & 0xFF;   // Middle byte
-    buffer[2] = (sample_18bit >> 24) & 0xFF;  // Most significant byte
+    buffer[2] = (sample_18bit >> 8) & 0xFF;   // Middle byte
+    buffer[3] = (sample_18bit >> 0) & 0xFF;   // Least significant byte (LSB)
 
     // Write the 3-byte (24-bit) sample to the file
     fwrite(buffer, sizeof(buffer), 1, file);
@@ -109,9 +110,9 @@ void write_wav_header(FILE *file, int num_samples) {
     short audio_format = 1;        // PCM
     short num_channels = 1;        // Mono
     int sample_rate = SAMPLE_RATE;
-    int byte_rate = SAMPLE_RATE * 3; // 3 bytes per sample for 24-bit PCM
-    short block_align = 3;         // 3 bytes per sample
-    short bits_per_sample = 24;    // 24 bits per sample
+    int byte_rate = SAMPLE_RATE * 4; // 3 bytes per sample for 24-bit PCM
+    short block_align = 4;         // 3 bytes per sample
+    short bits_per_sample = 32;    // 24 bits per sample
 
     fwrite(&subchunk1_size, 4, 1, file);
     fwrite(&audio_format, 2, 1, file);
