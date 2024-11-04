@@ -69,16 +69,16 @@ void write_18bit_sample(FILE *file, int32_t sample_18bit) {
 
 void parsemem(void* virtual_address, int word_count, FILE *file) {
     uint32_t *p = (uint32_t *)virtual_address;
-    char *b = (char*)virtual_address;
+    // char *b = (char*)virtual_address;
     int offset;
 
-    uint32_t sample_count = 0;
+    // uint32_t sample_count = 0;
     uint32_t sample_value = 0;
     uint32_t sample_value_prev = 0;
 
     for (offset = 0; offset < word_count; offset++) {
         sample_value = p[offset] & ((1<<18)-1);
-        sample_count = p[offset] >> 18;
+        // sample_count = p[offset] >> 18;
 
         for (int i = 0; i < 4; i++) {
             //bin(b[offset*4+i]);
