@@ -224,6 +224,8 @@ void send_file(int client_fd, int run, int board) {
             break;
         }
     }
+    
+    send(client_fd, "EOF", 3, 0);
 
     if (bytes_read == 0) {
         printf("File sent successfully.\n");
@@ -355,7 +357,7 @@ int main() {
                     printf("Unexpected data received.\n");
                 }
             } else {
-                printf("Failed to read data");
+                printf("Failed to read data\n");
             }                                                       
         }
     }
