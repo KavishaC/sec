@@ -139,7 +139,7 @@ void write_file(int run, int board) {
     audio_i2s_t my_config;
     if (audio_i2s_init(&my_config) < 0) {
         printf("Error initializing audio_i2s\n");
-        return -1;
+        return;
     }
 
     printf("mmapped address: %p\n", my_config.v_baseaddr);
@@ -161,7 +161,7 @@ void write_file(int run, int board) {
     FILE *file = fopen(filename, "wb");
     if (!file) {
         perror("Failed to open file");
-        return 1;
+        return;
     }
         
     // Calculate number of samples
