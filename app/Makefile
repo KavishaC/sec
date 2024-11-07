@@ -6,7 +6,7 @@ CFLAGS   += -g -Wall -O2 -std=c++11
 LDFLAGS  += $(LIBS) -lpthread -lz -rdynamic
 BUILD_DIR = build
 
-BINARY = demo32
+BINARY = sample32
 OBJ = $(BUILD_DIR)/main.o \
       $(BUILD_DIR)/audio_i2s.o \
       $(BUILD_DIR)/axi_dma.o \
