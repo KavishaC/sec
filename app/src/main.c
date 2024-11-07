@@ -361,6 +361,8 @@ int main() {
                 } else {
                     printf("Unexpected data received.\n");
                 }
+            } else {
+                perror("Failed to read data");
             }
         }
     }
