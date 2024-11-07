@@ -22,11 +22,8 @@
  */
 
 #include <stdio.h>
-#include <stdint.h>
-#include <stdlib.h>
 #include <string.h>
-#include <unistd.h>
-#include <arpa/inet.h>
+#include <stdint.h>
 
 #include "audio_i2s.h"
 // #include "wav.h"
@@ -36,10 +33,9 @@
 #define NUM_CHANNELS 2
 #define BPS 24
 #define SAMPLE_RATE 44100
-#define RECORD_DURATION 10 // 5 seconds
+#define RECORD_DURATION 10
 
 #define MAX_18BIT 131071  // Maximum value for signed 18-bit integer
-
 
 void bin(uint8_t n) {
     uint8_t i;
@@ -131,7 +127,7 @@ void write_wav_header(FILE *file, int num_samples) {
     fwrite(&subchunk2_size, 4, 1, file);
 }
 
-int write_file(int run) {
+int main() {
     printf("Entered main\n");
 
     uint32_t frames[TRANSFER_RUNS][TRANSFER_LEN] = {0};
@@ -152,13 +148,8 @@ int write_file(int run) {
     audio_i2s_set_reg(&my_config, AUDIO_I2S_GAIN, 0x1);
     printf("After writing to gain: %08x\n", audio_i2s_get_reg(&my_config, AUDIO_I2S_GAIN));
     
-    char filename[50];   // Buffer to hold the filename
-
-    // Construct the filename with the integer
-    sprintf(filename, "output%d_%d.wav", run, board);
-
     // open file
-    FILE *file = fopen(filename, "wb");
+    FILE *file = fopen("output.wav", "wb");
     if (!file) {
         perror("Failed to open file");
         return 1;
@@ -189,111 +180,5 @@ int write_file(int run) {
     fclose(file);
     
     printf("WAV file written successfully!\n");
-}
-
-#define PORT 5000         // Port to listen on
-#define BUFFER_SIZE 1024  // Buffer size for incoming data
-#define START_SIGNAL "START" // The expected start signal
-//#define SPECIFIC_IP "192.168.0.10" // Replace with the exact IP you want to allow
-
-int board;
-
-int main() {
-    int server_fd, client_fd;
-    struct sockaddr_in server_address, client_address;
-    socklen_t client_addr_len = sizeof(client_address);
-    char buffer[BUFFER_SIZE];
-
-    const char *env_var_name = "BOARD"; // The name of the environment variable
-    char *env_var_value = getenv(env_var_name); // Get the environment variable as a string
-
-    const char *master_ip_name = "MASTER_IP"; // The name of the environment variable
-    char *master_ip_value = getenv(master_ip_name); // Get the environment variable as a string
-
-    if (env_var_value == NULL) {
-        printf("Environment variable %s is not set.\n", env_var_name);
-        return 1;
-    }
-
-    // Convert the string to an integer
-    board = atoi(env_var_value); // Use atoi if you are sure the value is a valid integer
-    printf("The value of %s as an integer is: %d\n", env_var_name, board);
-
-    // Create the socket file descriptor
-    if ((server_fd = socket(AF_INET, SOCK_STREAM, 0)) == 0) {
-        perror("Socket failed");
-        exit(EXIT_FAILURE);
-    }
-
-    // Define server address
-    server_address.sin_family = AF_INET;
-    server_address.sin_addr.s_addr = inet_addr(master_ip_value); // Bind only to SPECIFIC_IP
-    server_address.sin_port = htons(PORT);
-
-    // Bind the socket to the specified IP and port
-    if (bind(server_fd, (struct sockaddr *)&server_address, sizeof(server_address)) < 0) {
-        perror("Bind failed");
-        close(server_fd);
-        exit(EXIT_FAILURE);
-    }
-
-    // Start listening for incoming connections
-    if (listen(server_fd, 1) < 0) {
-        perror("Listen failed");
-        close(server_fd);
-        exit(EXIT_FAILURE);
-    }
-    printf("Listening for a connection from IP %s on port %d...\n", master_ip_value, PORT);
-
-    // Accept a single connection
-    if ((client_fd = accept(server_fd, (struct sockaddr *)&client_address, &client_addr_len)) < 0) {
-        perror("Accept failed");
-        close(server_fd);
-        exit(EXIT_FAILURE);
-    }
-
-    // Check if the client IP matches the specific IP
-    char client_ip[INET_ADDRSTRLEN];
-    inet_ntop(AF_INET, &client_address.sin_addr, client_ip, INET_ADDRSTRLEN);
-    if (strcmp(client_ip, master_ip_value) != 0) {
-        printf("Connection from unauthorized IP %s. Closing connection.\n", client_ip);
-        close(client_fd);
-    } else {
-        printf("Connected to %s.\n", client_ip);
-
-        // Infinite loop to keep receiving data from this specific client
-        while (1) {
-            // Clear the buffer before each read
-            memset(buffer, 0, BUFFER_SIZE);
-
-            // Read data from the client
-            int bytes_read = read(client_fd, buffer, BUFFER_SIZE - 1); // Leave space for null terminator
-            if (bytes_read > 0) {
-                buffer[bytes_read] = '\0'; // Null-terminate the received data
-                printf("Received data: %s\n", buffer);
-                int number = atoi(buffer);
-
-                // Check if the received data is the "START" signal
-                if (number > 0) {
-                    printf("START signal received. Proceeding with the next steps...\n");
-                    // Add any additional actions you want to perform after receiving "START"
-                    write_file(number);
-                } else {
-                    printf("Unexpected data received.\n");
-                }
-            } else if (bytes_read == 0) {
-                // Connection was closed by the client
-                printf("Client disconnected. Waiting for reconnection...\n");
-                close(client_fd);
-                break;
-            } else {
-                perror("Failed to read data");
-                break;
-            }
-        }
-    }
-
-    // Close the server socket
-    close(server_fd);
     return 0;
 }
