@@ -36,7 +36,7 @@
 
 #define NUM_CHANNELS 2
 #define BPS 24
-#define SAMPLE_RATE 43403
+#define SAMPLE_RATE 41232 // 43403
 #define RECORD_DURATION 10 // 5 seconds
 
 #define MAX_18BIT 131071  // Maximum value for signed 18-bit integer
@@ -224,7 +224,7 @@ void send_file(int client_fd, int run, int board) {
             break;
         }
     }
-    
+
     send(client_fd, "EOF", 3, 0);
 
     if (bytes_read == 0) {
