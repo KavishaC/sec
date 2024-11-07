@@ -247,17 +247,17 @@ void read_env_var(int *b, char *board_ip_value, char *master_ip_value) {
 
     if (env_var_value == NULL) {
         printf("Environment variable %s is not set.\n", env_var_name);
-        return 1;
+        return;
     }
 
     if (board_ip_name == NULL) {
         printf("Environment variable %s is not set.\n", board_ip_name);
-        return 1;
+        return;
     }
 
     if (master_ip_name == NULL) {
         printf("Environment variable %s is not set.\n", master_ip_name);
-        return 1;
+        return;
     }
 
     // Convert the string to an integer
