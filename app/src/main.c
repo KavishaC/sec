@@ -131,7 +131,7 @@ void write_wav_header(FILE *file, int num_samples) {
     fwrite(&subchunk2_size, 4, 1, file);
 }
 
-int write_file(int run, int board) {
+void write_file(int run, int board) {
     printf("Entered main\n");
 
     uint32_t frames[TRANSFER_RUNS][TRANSFER_LEN] = {0};
