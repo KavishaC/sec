@@ -27,6 +27,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <arpa/inet.h>
+#include <fcntl.h>
 
 #include "audio_i2s.h"
 // #include "wav.h"
@@ -35,7 +36,7 @@
 
 #define NUM_CHANNELS 2
 #define BPS 24
-#define SAMPLE_RATE 44100
+#define SAMPLE_RATE 43403
 #define RECORD_DURATION 10 // 5 seconds
 
 #define MAX_18BIT 131071  // Maximum value for signed 18-bit integer
@@ -194,7 +195,67 @@ void write_file(int run, int board) {
 #define PORT 5000         // Port to listen on
 #define BUFFER_SIZE 1024  // Buffer size for incoming data
 #define START_SIGNAL "START" // The expected start signal
-//#define SPECIFIC_IP "192.168.0.10" // Replace with the exact IP you want to allow
+#define FILE_TRANSFER_PORT 6000  // Port for file transfer
+#define CHUNK_SIZE 1024  // Define chunk size for reading file data
+
+void send_file(int run, int board, const char *master_ip) {
+    int file_fd, transfer_fd;
+    struct sockaddr_in transfer_address;
+    char buffer[CHUNK_SIZE];
+    ssize_t bytes_read;
+
+    char filename[50];   // Buffer to hold the filename
+
+    // Construct the filename with the integer
+    sprintf(filename, "output%d_%d.wav", run, board);
+
+    // Open the file to be sent
+    file_fd = open(filename, O_RDONLY);
+    if (file_fd < 0) {
+        perror("Failed to open file for sending");
+        return;
+    }
+
+    // Create a new socket for file transfer
+    transfer_fd = socket(AF_INET, SOCK_STREAM, 0);
+    if (transfer_fd < 0) {
+        perror("Socket creation failed");
+        close(file_fd);
+        return;
+    }
+
+    // Set up the transfer server address
+    transfer_address.sin_family = AF_INET;
+    transfer_address.sin_port = htons(FILE_TRANSFER_PORT);
+    transfer_address.sin_addr.s_addr = inet_addr(master_ip);
+
+    // Connect to the master server for file transfer
+    if (connect(transfer_fd, (struct sockaddr *)&transfer_address, sizeof(transfer_address)) < 0) {
+        perror("Connection to master for file transfer failed");
+        close(transfer_fd);
+        close(file_fd);
+        return;
+    }
+    printf("Connected to master at %s:%d for file transfer.\n", master_ip, FILE_TRANSFER_PORT);
+
+    // Send the file in chunks
+    while ((bytes_read = read(file_fd, buffer, CHUNK_SIZE)) > 0) {
+        if (send(transfer_fd, buffer, bytes_read, 0) < 0) {
+            perror("Failed to send file data");
+            break;
+        }
+    }
+
+    if (bytes_read == 0) {
+        printf("File sent successfully.\n");
+    } else {
+        printf("File transfer incomplete due to an error.\n");
+    }
+
+    // Close the file and transfer socket
+    close(file_fd);
+    close(transfer_fd);
+}
 
 
 int main() {
@@ -294,17 +355,12 @@ int main() {
                     printf("START signal received. Proceeding with the next steps...\n");
                     // Add any additional actions you want to perform after receiving "START"
                     write_file(number, board);
+
+                    send_file(number, board, master_ip_value);
+                    printf("File transfer completed.\n");
                 } else {
                     printf("Unexpected data received.\n");
                 }
-            } else if (bytes_read == 0) {
-                // Connection was closed by the client
-                printf("Client disconnected. Waiting for reconnection...\n");
-                close(client_fd);
-                break;
-            } else {
-                perror("Failed to read data");
-                break;
             }
         }
     }
