@@ -207,6 +207,9 @@ int main() {
     const char *env_var_name = "BOARD"; // The name of the environment variable
     char *env_var_value = getenv(env_var_name); // Get the environment variable as a string
 
+    const char *board_ip_name = "BOARD_IP"; // The name of the environment variable
+    char *board_ip_value = getenv(board_ip_name); // Get the environment variable as a string
+
     const char *master_ip_name = "MASTER_IP"; // The name of the environment variable
     char *master_ip_value = getenv(master_ip_name); // Get the environment variable as a string
 
@@ -215,9 +218,22 @@ int main() {
         return 1;
     }
 
+    if (board_ip_name == NULL) {
+        printf("Environment variable %s is not set.\n", board_ip_name);
+        return 1;
+    }
+
+    if (master_ip_name == NULL) {
+        printf("Environment variable %s is not set.\n", master_ip_name);
+        return 1;
+    }
+
+
     // Convert the string to an integer
     board = atoi(env_var_value); // Use atoi if you are sure the value is a valid integer
     printf("The value of %s as an integer is: %d\n", env_var_name, board);
+    printf("The value of %s as an integer is: %s\n", board_ip_name, board_ip_value);
+    printf("The value of %s as an integer is: %s\n", master_ip_name, master_ip_value);
 
     // Create the socket file descriptor
     if ((server_fd = socket(AF_INET, SOCK_STREAM, 0)) == 0) {
@@ -227,7 +243,7 @@ int main() {
 
     // Define server address
     server_address.sin_family = AF_INET;
-    server_address.sin_addr.s_addr = inet_addr(master_ip_value); // Bind only to SPECIFIC_IP
+    server_address.sin_addr.s_addr = inet_addr(board_ip_value); // Bind only to SPECIFIC_IP
     server_address.sin_port = htons(PORT);
 
     // Bind the socket to the specified IP and port
@@ -243,7 +259,7 @@ int main() {
         close(server_fd);
         exit(EXIT_FAILURE);
     }
-    printf("Listening for a connection from IP %s on port %d...\n", master_ip_value, PORT);
+    printf("Listening for a connection from IP %s on port %d...\n", board_ip_value, PORT);
 
     // Accept a single connection
     if ((client_fd = accept(server_fd, (struct sockaddr *)&client_address, &client_addr_len)) < 0) {
