@@ -131,7 +131,7 @@ void write_wav_header(FILE *file, int num_samples) {
     fwrite(&subchunk2_size, 4, 1, file);
 }
 
-int write_file(int run) {
+int write_file(int run, int board) {
     printf("Entered main\n");
 
     uint32_t frames[TRANSFER_RUNS][TRANSFER_LEN] = {0};
@@ -196,9 +196,9 @@ int write_file(int run) {
 #define START_SIGNAL "START" // The expected start signal
 //#define SPECIFIC_IP "192.168.0.10" // Replace with the exact IP you want to allow
 
-int board;
 
 int main() {
+    int board;
     int server_fd, client_fd;
     struct sockaddr_in server_address, client_address;
     socklen_t client_addr_len = sizeof(client_address);
@@ -277,7 +277,7 @@ int main() {
                 if (number > 0) {
                     printf("START signal received. Proceeding with the next steps...\n");
                     // Add any additional actions you want to perform after receiving "START"
-                    write_file(number);
+                    write_file(number, board);
                 } else {
                     printf("Unexpected data received.\n");
                 }
