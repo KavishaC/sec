@@ -235,36 +235,36 @@ void send_file(int client_fd, int run, int board) {
     close(file_fd);
 }
 
-void read_env_var(int *b, char *board_ip_value, char *master_ip_value) {
+void read_env_var(int *b, char **board_ip_value, char **master_ip_value) {
     const char *env_var_name = "BOARD"; // The name of the environment variable
     char *env_var_value = getenv(env_var_name); // Get the environment variable as a string
 
     const char *board_ip_name = "BOARD_IP"; // The name of the environment variable
-    board_ip_value = getenv(board_ip_name); // Get the environment variable as a string
+    *board_ip_value = getenv(board_ip_name); // Get the environment variable as a string
 
     const char *master_ip_name = "MASTER_IP"; // The name of the environment variable
-    master_ip_value = getenv(master_ip_name); // Get the environment variable as a string
+    *master_ip_value = getenv(master_ip_name); // Get the environment variable as a string
 
     if (env_var_value == NULL) {
         printf("Environment variable %s is not set.\n", env_var_name);
         return;
     }
 
-    if (board_ip_name == NULL) {
+    if (*board_ip_value == NULL) {
         printf("Environment variable %s is not set.\n", board_ip_name);
         return;
     }
 
-    if (master_ip_name == NULL) {
+    if (*master_ip_value == NULL) {
         printf("Environment variable %s is not set.\n", master_ip_name);
         return;
     }
 
     // Convert the string to an integer
     *b = atoi(env_var_value); // Use atoi if you are sure the value is a valid integer
-    printf("The value of %s as an integer is: %d\n", env_var_name, *b);
-    printf("The value of %s as an integer is: %s\n", board_ip_name, board_ip_value);
-    printf("The value of %s as an integer is: %s\n", master_ip_name, master_ip_value);
+    printf("The value of %s is: %d\n", env_var_name, *b);
+    printf("The value of %s is: %s\n", board_ip_name, *board_ip_value);
+    printf("The value of %s is: %s\n", master_ip_name, *master_ip_value);
 }
 
 
@@ -273,7 +273,7 @@ int main() {
     char *board_ip_value;
     char *master_ip_value;
 
-    read_env_var(&board, board_ip_value, master_ip_value);
+    read_env_var(&board, &board_ip_value, &master_ip_value);
 
     int server_fd, client_fd;
     struct sockaddr_in server_address, client_address;
