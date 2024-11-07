@@ -198,8 +198,9 @@ void write_file(int run, int board) {
 #define FILE_TRANSFER_PORT 6000  // Port for file transfer
 #define CHUNK_SIZE 1024  // Define chunk size for reading file data
 
-void send_file(int client_fd, int run, int board) {
-    int file_fd;
+void send_file(int run, int board, const char *master_ip) {
+    int file_fd, transfer_fd;
+    struct sockaddr_in transfer_address;
     char buffer[CHUNK_SIZE];
     ssize_t bytes_read;
 
@@ -215,11 +216,31 @@ void send_file(int client_fd, int run, int board) {
         return;
     }
 
-    printf("Sending file %s to master...\n", filename);
+    // Create a new socket for file transfer
+    transfer_fd = socket(AF_INET, SOCK_STREAM, 0);
+    if (transfer_fd < 0) {
+        perror("Socket creation failed");
+        close(file_fd);
+        return;
+    }
 
-    // Send the file in chunks over the existing connection
+    // Set up the transfer server address
+    transfer_address.sin_family = AF_INET;
+    transfer_address.sin_port = htons(FILE_TRANSFER_PORT);
+    transfer_address.sin_addr.s_addr = inet_addr(master_ip);
+
+    // Connect to the master server for file transfer
+    if (connect(transfer_fd, (struct sockaddr *)&transfer_address, sizeof(transfer_address)) < 0) {
+        perror("Connection to master for file transfer failed");
+        close(transfer_fd);
+        close(file_fd);
+        return;
+    }
+    printf("Connected to master at %s:%d for file transfer.\n", master_ip, FILE_TRANSFER_PORT);
+
+    // Send the file in chunks
     while ((bytes_read = read(file_fd, buffer, CHUNK_SIZE)) > 0) {
-        if (send(client_fd, buffer, bytes_read, 0) < 0) {
+        if (send(transfer_fd, buffer, bytes_read, 0) < 0) {
             perror("Failed to send file data");
             break;
         }
@@ -231,19 +252,27 @@ void send_file(int client_fd, int run, int board) {
         printf("File transfer incomplete due to an error.\n");
     }
 
-    // Close the file descriptor but keep the client_fd open for future communication
+    // Close the file and transfer socket
     close(file_fd);
+    close(transfer_fd);
 }
 
-void read_env_var(int *b, char *board_ip_value, char *master_ip_value) {
+
+int main() {
+    int board;
+    int server_fd, client_fd;
+    struct sockaddr_in server_address, client_address;
+    socklen_t client_addr_len = sizeof(client_address);
+    char buffer[BUFFER_SIZE];
+
     const char *env_var_name = "BOARD"; // The name of the environment variable
     char *env_var_value = getenv(env_var_name); // Get the environment variable as a string
 
     const char *board_ip_name = "BOARD_IP"; // The name of the environment variable
-    board_ip_value = getenv(board_ip_name); // Get the environment variable as a string
+    char *board_ip_value = getenv(board_ip_name); // Get the environment variable as a string
 
     const char *master_ip_name = "MASTER_IP"; // The name of the environment variable
-    master_ip_value = getenv(master_ip_name); // Get the environment variable as a string
+    char *master_ip_value = getenv(master_ip_name); // Get the environment variable as a string
 
     if (env_var_value == NULL) {
         printf("Environment variable %s is not set.\n", env_var_name);
@@ -260,25 +289,12 @@ void read_env_var(int *b, char *board_ip_value, char *master_ip_value) {
         return 1;
     }
 
+
     // Convert the string to an integer
-    *b = atoi(env_var_value); // Use atoi if you are sure the value is a valid integer
-    printf("The value of %s as an integer is: %d\n", env_var_name, *b);
+    board = atoi(env_var_value); // Use atoi if you are sure the value is a valid integer
+    printf("The value of %s as an integer is: %d\n", env_var_name, board);
     printf("The value of %s as an integer is: %s\n", board_ip_name, board_ip_value);
     printf("The value of %s as an integer is: %s\n", master_ip_name, master_ip_value);
-}
-
-
-int main() {
-    int board;
-    char *board_ip_value;
-    char *master_ip_value;
-
-    read_env_var(&board, board_ip_value, master_ip_value);
-
-    int server_fd, client_fd;
-    struct sockaddr_in server_address, client_address;
-    socklen_t client_addr_len = sizeof(client_address);
-    char buffer[BUFFER_SIZE];
 
     // Create the socket file descriptor
     if ((server_fd = socket(AF_INET, SOCK_STREAM, 0)) == 0) {
@@ -324,7 +340,6 @@ int main() {
     // Check if the client IP matches the specific IP
     char client_ip[INET_ADDRSTRLEN];
     inet_ntop(AF_INET, &client_address.sin_addr, client_ip, INET_ADDRSTRLEN);
-
     if (strcmp(client_ip, master_ip_value) != 0) {
         printf("Connection from unauthorized IP %s. Closing connection.\n", client_ip);
         close(client_fd);
@@ -349,13 +364,13 @@ int main() {
                     // Add any additional actions you want to perform after receiving "START"
                     write_file(number, board);
 
-                    send_file(client_fd, number, board);
+                    send_file(number, board, master_ip_value);
                     printf("File transfer completed.\n");
                 } else {
                     printf("Unexpected data received.\n");
                 }
             } else {
-                printf("Failed to read data");
+                perror("Failed to read data");
             }                                                       
         }
     }
