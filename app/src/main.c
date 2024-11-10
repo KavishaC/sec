@@ -41,7 +41,7 @@
 
 #define MAX_18BIT 131071  // Maximum value for signed 18-bit integer
 
-#define ERROR_SAMPLES 2577
+#define ERROR_SAMPLES 5154
 
 void bin(uint8_t n) {
     uint8_t i;
