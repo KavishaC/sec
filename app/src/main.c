@@ -231,6 +231,12 @@ void send_file(int client_fd, int run, int board) {
 
     if (bytes_read == 0) {
         printf("File sent successfully.\n");
+        // Delete the file after successfully sending it
+        if (remove(filename) == 0) {
+            printf("File %s deleted successfully.\n", filename);
+        } else {
+            perror("Failed to delete the file");
+        }
     } else {
         printf("File transfer incomplete due to an error.\n");
     }
