@@ -41,6 +41,7 @@
 
 #define MAX_18BIT 131071  // Maximum value for signed 18-bit integer
 
+#define ERROR_SAMPLES 2577
 
 void bin(uint8_t n) {
     uint8_t i;
@@ -69,7 +70,7 @@ void write_18bit_sample(FILE *file, uint32_t sample_18bit) {
     fwrite(buffer, sizeof(buffer), 1, file);
 }
 
-void parsemem(void* virtual_address, int word_count, FILE *file) {
+void parsemem(void* virtual_address, int word_count, FILE *file, int* j) {
     uint32_t *p = (uint32_t *)virtual_address;
     // char *b = (char*)virtual_address;
     int offset;
@@ -90,12 +91,13 @@ void parsemem(void* virtual_address, int word_count, FILE *file) {
         //printf(" -> [%d]: %02x (%dp)\n", sample_count, sample_value, sample_value*100/((1<<18)-1));
 
         // Write the 18-bit sample as 24-bit audio
-        if ((offset % 2) == 1) {
+        if (((offset % 2) == 1) && (*j >= ERROR_SAMPLES)) {
             write_18bit_sample(file, sample_value + sample_value_prev); // maybe change later
         }
 
         // write_18bit_sample(file, sample_value);
         sample_value_prev = sample_value;
+        *j += 1;
     }
 }
 
@@ -166,7 +168,7 @@ void write_file(int run, int board) {
     }
         
     // Calculate number of samples
-    uint32_t num_samples = TRANSFER_RUNS * TRANSFER_LEN;      // For simplicity, writing 1 sample
+    uint32_t num_samples = TRANSFER_RUNS * TRANSFER_LEN - ERROR_SAMPLES;      // For simplicity, writing 1 sample
 
     // Write WAV header
     write_wav_header(file, num_samples);
@@ -178,10 +180,10 @@ void write_file(int run, int board) {
         int32_t *samples = audio_i2s_recv(&my_config);
         memcpy(frames[i], samples, TRANSFER_LEN*sizeof(uint32_t));
     }
-
+    int j = 0;
     for (int i = 0; i < TRANSFER_RUNS; i++) {
         //printf("Frame %d:\n", i);
-        parsemem(frames[i], TRANSFER_LEN, file);
+        parsemem(frames[i], TRANSFER_LEN, file, &j);
         //printf("==============================\n");
     }
     
