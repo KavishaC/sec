@@ -168,7 +168,7 @@ void write_file(int run, int board) {
     }
         
     // Calculate number of samples
-    uint32_t num_samples = TRANSFER_RUNS * TRANSFER_LEN - ERROR_SAMPLES;      // For simplicity, writing 1 sample
+    uint32_t num_samples = (TRANSFER_RUNS * TRANSFER_LEN - ERROR_SAMPLES)/2;      // For simplicity, writing 1 sample
 
     // Write WAV header
     write_wav_header(file, num_samples);
